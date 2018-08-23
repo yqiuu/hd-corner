@@ -43,10 +43,13 @@ def hdr2d(xData, yData, density, regions = [68, 10], norm = None, logScale = Fal
     else:
         density = density/norm
     #        
-    c = np.full(len(density), -1.)
-    for q in np.sort(regions)[::-1]:
-        inds, p = get_hdr(density, q)
-        c[inds] = p
+    if regions is None:
+        c = density
+    else:
+        c = np.full(len(density), -1.)
+        for q in np.sort(regions)[::-1]:
+            inds, p = get_hdr(density, q)
+            c[inds] = p
     # Exclude all points beyond the largest region
     cond = c > 0.
     x = np.array(xData[cond])
