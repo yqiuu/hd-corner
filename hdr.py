@@ -1,5 +1,5 @@
 import numpy as np, matplotlib.pyplot as plt
-from scipy.interpolate import UnivariateSpline as spl 
+from scipy.interpolate import InterpolatedUnivariateSpline as spl
 
 
 def get_hdr(density, q = 68):
@@ -13,20 +13,22 @@ def get_hdr_bounds(data, density, q = 68):
     return min(hdr), max(hdr), p
 
 
-def hdr1d(data, density, regions = [68, 10], norm = None, logScale = False, xBins = None,
-               **kwargs):
-    if xBins is None:
-        xBins = np.linspace(min(data), max(data), 20)
+def hdr1d(data, density, regions = [68, 10], norm = None, logScale = False, bins = 20, **kwargs):
+    if np.isscalar(bins):
+        bins = np.linspace(min(data), max(data), bins)
+    elif type(bins) is dict:
+        bins = bins[data.name]
     if norm is None:
         density = density/get_hdr(density, q = 68)[1]
     else:
         density = density/norm
-    x = xBins[:-1] + np.diff(xBins)/2.
-    y = np.zeros(len(x))
-    for i, (l, u) in enumerate(zip(xBins[:-1], xBins[1:])):
+    xp = bins[:-1] + np.diff(bins)/2.
+    yp = np.zeros(len(xp))
+    for i, (l, u) in enumerate(zip(bins[:-1], bins[1:])):
         p = density[(data >= l) & (data < u)]
-        y[i] = max(p) if len(p) != 0 else 0.
-    plt.plot(x, y, **kwargs)
+        yp[i] = max(p) if len(p) != 0 else 0.
+    x = np.linspace(xp[0], xp[-1], 100)
+    plt.plot(x, spl(xp, yp)(x), **kwargs)
 
 
 def hdr2d(xData, yData, density, regions = [68, 10], norm = None, logScale = False, **kwargs):
