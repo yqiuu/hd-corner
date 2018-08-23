@@ -19,7 +19,7 @@ def hdr1d(data, density, regions = [68, 10], norm = None, logScale = False, bins
     elif type(bins) is dict:
         bins = bins[data.name]
     if norm is None:
-        density = density/get_hdr(density, q = 68)[1]
+        density = density/max(density)
     else:
         density = density/norm
     xp = bins[:-1] + np.diff(bins)/2.
@@ -39,7 +39,7 @@ def hdr2d(xData, yData, density, regions = [68, 10], norm = None, logScale = Fal
         if key in kwargs:
             kwargs.pop(key)
     if norm is None:
-        density = density/get_hdr(density, q = 68)[1]
+        density = density/max(density)
     else:
         density = density/norm
     #        
