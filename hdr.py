@@ -18,7 +18,7 @@ def get_hdr_bounds(data, density, q = 68):
     return min(hdr), max(hdr), p
 
 
-def hdr1d(data, density, regions = [68, 10], norm = None, logScale = False, bins = 20, **kwargs):
+def hdr1d(data, density, norm = None, bins = 20, **kwargs):
     if np.isscalar(bins):
         bins = np.linspace(min(data), max(data), bins)
     elif type(bins) is dict:
@@ -37,8 +37,6 @@ def hdr1d(data, density, regions = [68, 10], norm = None, logScale = False, bins
 
 
 def hdr2d(xData, yData, density, regions = [68, 10], norm = None, logScale = False, **kwargs):
-    #if density is None:
-    #    raise ValueError("density must be given.")
     # Remove possible duplicated parameters
     for key in ['c', 'color']:
         if key in kwargs:
