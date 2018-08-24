@@ -1,4 +1,4 @@
-import numpy as np, matplotlib.pyplot as plt
+import numpy as np, matplotlib.pyplot as plt, seaborn as sns
 from scipy.interpolate import InterpolatedUnivariateSpline as spl
 
 
@@ -63,5 +63,42 @@ def hdr2d(xData, yData, density, regions = [68, 10], norm = None, logScale = Fal
     y = y[inds]
     c = c[inds]
     plt.scatter(x, y, c = c, **kwargs)
+
+
+def corner(data, density, upper = False, visible = False, cax = 'default',
+           regions = [68, 10], norm = None, bins = 20, logScale = False,
+           kwargs1d = {}, kwargs2d = {}, **kwargs):
+    g = sns.PairGrid(data, **kwargs)
+    g.map_diag(hdr1d, density = density, norm = norm, bins = bins, **kwargs1d)
+    if upper:
+        g.map_upper(hdr2d, density = density, regions = regions, norm = norm, logScale = logScale,
+                    **kwargs2d)
+    else:
+        g.map_lower(hdr2d, density = density, regions = regions, norm = norm, logScale = logScale,
+                    **kwargs2d)
+    ndim = len(g.axes)
+    for iRow in range(ndim):
+        for iCol in range(ndim):
+            if (iRow == ndim - 1 & iCol == ndim - 1):
+                if norm is None:
+                    maxY = 1.2
+                else:
+                    maxY = 1.2*max(density)/norm
+                g.diag_axes[iRow].set_ylim(0., maxY)
+            if visible:
+                continue
+            if upper:
+                if iRow > iCol:
+                    g.axes[iRow, iCol].axis('off')
+            else:
+                if iRow < iCol:
+                    g.axes[iRow, iCol].axis('off')
+    if cax is not None:
+        if cax == 'default':
+            cax = g.fig.add_axes([.98, .10, .02, .8])
+        plt.colorbar(cax = cax, spacing = 'porporational')
+        plt.subplots_adjust(right = .92)
+    plt.subplots_adjust(hspace = 0., wspace = 0.)
+    return g
 
 
