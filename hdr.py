@@ -68,6 +68,29 @@ def hdr2d(xData, yData, density, regions = [68, 10], norm = None, logScale = Fal
     plt.scatter(x, y, c = c, **kwargs)
 
 
+def plot_best_fit(xData, yData = None, density = None, best = None, kwargsDot = {}, **kwargs):
+    if density is not None:
+        idx, _ = get_hdr(density, q = 0.)
+        bestX = np.unique(xData[idx])[0]
+    elif best is not None:
+        bestX = best[xData.name]
+    else:
+        raise ValueError("Either density and best must be given!")
+    if 'linestyle' not in kwargs:
+        kwargs['linestyle'] = '--'
+    plt.axvline(bestX, **kwargs)
+    if yData is not None:
+        try:
+            bestY = np.unique(yData[idx])[0]
+        except NameError:
+            bestY = best[yData.name]
+        plt.axhline(bestY, **kwargs)
+        if len(kwargsDot) == 0:
+           plt.plot(bestX, bestY, marker = 'o', markersize = 5)
+        else:
+           plt.plot(bestX, bestY, **kwargsDot)
+
+
 def corner(data, density, upper = False, visible = False, cax = 'default',
            regions = [68, 10], norm = None, bins = 20, logScale = False,
            kwargs1d = {}, kwargs2d = {}, **kwargs):
