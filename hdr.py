@@ -4,7 +4,12 @@ from scipy.interpolate import InterpolatedUnivariateSpline as spl
 
 def get_hdr(density, q = 68):
     inds = density > np.percentile(density, q = 100. - q)
-    return inds, min(density[inds])
+    if any(inds):
+        return inds, min(density[inds])
+    else:
+        maximum = max(density)
+        inds = density == maximum
+        return inds, maximum
 
 
 def get_hdr_bounds(data, density, q = 68):
