@@ -68,6 +68,24 @@ def hdr2d(xData, yData, density, regions = [68, 10], norm = None, logScale = Fal
     plt.scatter(x, y, c = c, **kwargs)
 
 
+def plot_hdr_bounds(xData, yData = None, density = None, regions = [68], **kwargs):
+    if density is None:
+        raise ValueError("density must be given!")
+    if 'linestyle' not in kwargs:
+        kwargs['linestyle'] = '--'
+    for q in regions:
+        lower, upper, _ = get_hdr_bounds(xData, density, q)
+        plt.axvline(lower, **kwargs)
+        if upper != lower:
+            plt.axvline(upper, **kwargs)
+    if yData is not None:
+        for q in regions:
+            lower, upper, _ = get_hdr_bounds(yData, density, q)
+            plt.axhline(lower, **kwargs)
+            if upper != lower:
+                plt.axhline(upper, **kwargs)
+
+
 def plot_best_fit(xData, yData = None, density = None, best = None, kwargsDot = {}, **kwargs):
     if density is not None:
         idx, _ = get_hdr(density, q = 0.)
