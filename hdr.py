@@ -1,4 +1,7 @@
-import numpy as np, matplotlib.pyplot as plt, seaborn as sns
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 from scipy.interpolate import InterpolatedUnivariateSpline as spl
 
 
@@ -112,6 +115,8 @@ def plot_best_fit(xData, yData = None, density = None, best = None, kwargsDot = 
 def corner(data, density, upper = False, visible = False, cax = 'default',
            regions = [68, 10], norm = None, bins = 20, logScale = False,
            kwargs1d = {}, kwargs2d = {}, **kwargs):
+    if type(data) is not pd.DataFrame:
+        data = pd.DataFrame(data, columns = ['x%d'%i for i in range(data.shape[-1])])
     g = sns.PairGrid(data, **kwargs)
     g.map_diag(hdr1d, density = density, norm = norm, bins = bins, **kwargs1d)
     if upper:
