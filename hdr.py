@@ -40,6 +40,9 @@ def hdr1d(data, density, norm = None, bins = 20, **kwargs):
 
 
 def hdr2d(xData, yData, density, regions = [68, 10], norm = None, logScale = False, **kwargs):
+    # Add default parameters
+    if 's' not in kwargs:
+        kwargs['s'] = 1
     # Remove possible duplicated parameters
     for key in ['c', 'color']:
         if key in kwargs:
