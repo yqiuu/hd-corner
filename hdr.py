@@ -21,22 +21,21 @@ def get_hdr_bounds(data, prob, q = 68):
     return min(hdr), max(hdr), p
 
 
-def plot_hdr1d(data, prob, norm = None, bins = 20, **kwargs):
+def plot_hdr1d(data, prob, bins = 20, smooth = True, **kwargs):
     if np.isscalar(bins):
         bins = np.linspace(min(data), max(data), bins)
     elif type(bins) is dict:
         bins = bins[data.name]
-    if norm is None:
-        prob = prob/max(prob)
-    else:
-        prob = prob/norm
     xp = bins[:-1] + np.diff(bins)/2.
     yp = np.zeros(len(xp))
     for i, (l, u) in enumerate(zip(bins[:-1], bins[1:])):
         p = prob[(data >= l) & (data < u)]
         yp[i] = max(p) if len(p) != 0 else 0.
     x = np.linspace(xp[0], xp[-1], 100)
-    plt.plot(x, spl(xp, yp)(x), **kwargs)
+    if smooth:
+        plt.plot(x, spl(xp, yp)(x), **kwargs)
+    else:
+        plt.plot(xp, yp, **kwargs)
 
 
 def plot_hdr2d(xData, yData, prob, regions = [10, 68], colors = None, **kwargs):
