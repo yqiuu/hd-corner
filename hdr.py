@@ -142,7 +142,7 @@ def corner(data, prob, upper = False, visible = False, cax = 'default',
 
 
 class hdr_corner(sns.PairGrid):
-    def __init__(self, data, logProb, regions = [10, 68, 95], norm = None, **kwargs):
+    def __init__(self, data, logProb, quick = True, norm = None, **kwargs):
         if type(data) is not pd.DataFrame:
             data = pd.DataFrame(data, columns = ['x%d'%i for i in range(data.shape[-1])])
         kwargs['diag_sharey'] = False
@@ -156,8 +156,11 @@ class hdr_corner(sns.PairGrid):
             prob = prob/norm
         self.prob = prob
         #
-        self.map_diag(plot_hdr1d, prob = prob, norm = norm)
-        self.map_lower(plot_hdr2d, prob = prob, regions = regions)
+        if quick:
+            self.map_diag_with_prob(plot_hdr1d)
+            self.map_lower_with_prob(plot_hdr2d)
+        else:
+            self.map_diag(self._do_nothing)
         yMax = 1.2*max(prob)
         for iA, ax in enumerate(self.diag_axes):
             ax.axis('on')
@@ -183,3 +186,14 @@ class hdr_corner(sns.PairGrid):
         # Disable the origianl class method
         pass
 
+    
+    def _do_nothing(self, xData = None, yData = None, **kwargs):
+        pass
+
+    
+    def map_diag_with_prob(self, func, **kwargs):
+        self.map_diag(func, prob = self.prob, **kwargs)
+
+
+    def map_lower_with_prob(self, func, **kwargs):
+        self.map_lower(func, prob = self.prob, **kwargs)
