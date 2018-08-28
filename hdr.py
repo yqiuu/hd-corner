@@ -101,46 +101,7 @@ def plot_best_fit(xData, yData = None, prob = None, best = None, kwargsDot = {},
            plt.plot(bestX, bestY, **kwargsDot)
 
 
-def corner(data, prob, upper = False, visible = False, cax = 'default',
-           regions = [68, 10], norm = None, bins = 20, logScale = False,
-           kwargs1d = {}, kwargs2d = {}, **kwargs):
-    if type(data) is not pd.DataFrame:
-        data = pd.DataFrame(data, columns = ['x%d'%i for i in range(data.shape[-1])])
-    g = sns.PairGrid(data, **kwargs)
-    g.map_diag(hdr1d, prob = prob, norm = norm, bins = bins, **kwargs1d)
-    if upper:
-        g.map_upper(hdr2d, prob = prob, regions = regions, norm = norm, logScale = logScale,
-                    **kwargs2d)
-    else:
-        g.map_lower(hdr2d, prob = prob, regions = regions, norm = norm, logScale = logScale,
-                    **kwargs2d)
-    ndim = len(g.axes)
-    for iRow in range(ndim):
-        for iCol in range(ndim):
-            if (iRow == ndim - 1 & iCol == ndim - 1):
-                if norm is None:
-                    maxY = 1.2
-                else:
-                    maxY = 1.2*max(prob)/norm
-                g.diag_axes[iRow].set_ylim(0., maxY)
-            if visible:
-                continue
-            if upper:
-                if iRow > iCol:
-                    g.axes[iRow, iCol].axis('off')
-            else:
-                if iRow < iCol:
-                    g.axes[iRow, iCol].axis('off')
-    if cax is not None:
-        if cax == 'default':
-            cax = g.fig.add_axes([.98, .10, .02, .8])
-        plt.colorbar(cax = cax, spacing = 'porporational')
-        plt.subplots_adjust(right = .92)
-    plt.subplots_adjust(hspace = 0., wspace = 0.)
-    return g
-
-
-class hdr_corner(sns.PairGrid):
+class corner(sns.PairGrid):
     def __init__(self, data, logProb, quick = True, norm = None, **kwargs):
         if type(data) is not pd.DataFrame:
             data = pd.DataFrame(data, columns = ['x%d'%i for i in range(data.shape[-1])])
