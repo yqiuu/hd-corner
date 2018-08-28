@@ -5,6 +5,15 @@ import seaborn as sns
 from scipy.interpolate import InterpolatedUnivariateSpline as spl
 
 
+__all__ = ['get_hdr',
+           'get_hdr_bounds',
+           'plot_hdr1d',
+           'plot_hdr2d',
+           'plot_hdr_bounds',
+           'plot_best_fit',
+           'corner']
+
+
 def get_hdr(prob, q = 68):
     inds = prob > np.percentile(prob, q = 100. - q)
     if any(inds):
