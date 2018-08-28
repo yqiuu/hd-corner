@@ -39,7 +39,7 @@ def plot_hdr1d(data, prob, norm = None, bins = 20, **kwargs):
     plt.plot(x, spl(xp, yp)(x), **kwargs)
 
 
-def plot_hdr2d(xData, yData, prob, regions = [68, 10], norm = None, logScale = False, **kwargs):
+def plot_hdr2d(xData, yData, prob, regions = [10, 68], colors = None, **kwargs):
     # Add default parameters
     if 's' not in kwargs:
         kwargs['s'] = 1
@@ -47,31 +47,18 @@ def plot_hdr2d(xData, yData, prob, regions = [68, 10], norm = None, logScale = F
     for key in ['c', 'color']:
         if key in kwargs:
             kwargs.pop(key)
-    if norm is None:
-        prob = prob/max(prob)
-    else:
-        prob = prob/norm
     #        
     if regions is None:
-        c = prob
+        inds = np.argsort(prob)
+        plt.scatter(xData[inds], yData[inds], c = prob[inds], **kwargs)
     else:
-        c = np.full(len(prob), -1.)
-        for q in np.sort(regions)[::-1]:
-            inds, p = get_hdr(prob, q)
-            c[inds] = p
-    # Exclude all points beyond the largest region
-    cond = c > 0.
-    x = np.array(xData[cond])
-    y = np.array(yData[cond])
-    c = np.array(c[cond])
-    if logScale:
-        c = np.log(c)
-    # Sort the data such that lower prob regions are plotted first
-    inds = np.argsort(c)
-    x = x[inds]
-    y = y[inds]
-    c = c[inds]
-    plt.scatter(x, y, c = c, **kwargs)
+        if colors is None:
+            colors = sns.color_palette("GnBu", n_colors = len(regions))
+        for q, c in zip(np.sort(regions)[::-1], colors):
+            inds, _ = get_hdr(prob, q)
+            if type(c) is not str:
+                c = [c]
+            plt.scatter(xData[inds], yData[inds], c = c, **kwargs)
 
 
 def plot_hdr_bounds(xData, yData = None, prob = None, regions = [68], **kwargs):
@@ -155,7 +142,7 @@ def corner(data, prob, upper = False, visible = False, cax = 'default',
 
 
 class hdr_corner(sns.PairGrid):
-    def __init__(self, data, logProb, norm = None, **kwargs):
+    def __init__(self, data, logProb, regions = [10, 68, 95], norm = None, **kwargs):
         if type(data) is not pd.DataFrame:
             data = pd.DataFrame(data, columns = ['x%d'%i for i in range(data.shape[-1])])
         kwargs['diag_sharey'] = False
@@ -170,7 +157,7 @@ class hdr_corner(sns.PairGrid):
         self.prob = prob
         #
         self.map_diag(plot_hdr1d, prob = prob, norm = norm)
-        self.map_lower(plot_hdr2d, prob = prob, norm = norm)
+        self.map_lower(plot_hdr2d, prob = prob, regions = regions)
         yMax = 1.2*max(prob)
         for iA, ax in enumerate(self.diag_axes):
             ax.axis('on')
