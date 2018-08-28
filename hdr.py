@@ -102,14 +102,13 @@ def plot_best_fit(xData, yData = None, prob = None, best = None, kwargsDot = {},
 
 
 class corner(sns.PairGrid):
-    def __init__(self, data, logProb, quick = True, norm = None, **kwargs):
+    def __init__(self, data, prob, quick = True, norm = None, **kwargs):
         if type(data) is not pd.DataFrame:
             data = pd.DataFrame(data, columns = ['x%d'%i for i in range(data.shape[-1])])
         kwargs['diag_sharey'] = False
         kwargs['despine']     = False
         super().__init__(data, **kwargs)
         #
-        prob = np.exp(logProb)
         if norm is None:
             prob = prob/max(prob)
         else:
