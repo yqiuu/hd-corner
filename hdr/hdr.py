@@ -165,3 +165,14 @@ class corner(sns.PairGrid):
 
     def map_lower_with_prob(self, func, **kwargs):
         self.map_lower(func, prob = self.prob, **kwargs)
+
+
+    def set_labels(self, labels):
+        if len(labels) != len(self.axes):
+            raise ValueError("label number mismatch")
+        # Set column labels
+        for ax, label in zip(self.axes[1:, 0], labels[1:]):
+            ax.set_ylabel(label)
+        # Set row labels
+        for ax, label in zip(self.axes[-1, :], labels):
+            ax.set_xlabel(label)
