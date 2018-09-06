@@ -129,13 +129,10 @@ class corner(sns.PairGrid):
             self.map_lower_with_prob(plot_hdr2d)
         else:
             self.map_diag(self._do_nothing)
-        yMax = 1.2*max(prob)
         for iA, ax in enumerate(self.diag_axes):
             ax.axis('on')
             ax.set_xlabel('')
             plt.setp(ax.get_xticklabels(), visible = False)
-            ax.set_ylim(0, yMax)
-            ax.set_yticks(np.linspace(0, yMax, 7)[1::2])
             ax.yaxis.tick_right()
             #
             ax = self.axes[iA, iA]
@@ -176,3 +173,33 @@ class corner(sns.PairGrid):
         # Set row labels
         for ax, label in zip(self.axes[-1, :], labels):
             ax.set_xlabel(label)
+
+
+    def set_xlim(self, bounds):
+        for ax, b in zip(self.axes[-1, :], bounds):
+            ax.set_xlim(*b)
+
+
+    def set_ylim(self, bounds):
+        for ax, b in zip(self.axes[:, 0], bounds):
+            ax.set_ylim(*b)
+
+
+    def set_diag_ylim(self, bounds):
+        for ax, b in zip(self.diag_axes, bounds):
+            ax.set_ylim(*b)
+
+
+    def set_xticks(self, ticks):
+        for ax, t in zip(self.axes[-1, :], ticks):
+            ax.set_xticks(t)
+
+
+    def set_yticks(self, ticks):
+        for ax, t in zip(self.axes[:, 0], ticks):
+            ax.set_yticks(t)
+
+
+    def set_diag_yticks(self, ticks):
+        for ax, t in zip(self.diag_axes, ticks):
+            ax.set_yticks(t)
