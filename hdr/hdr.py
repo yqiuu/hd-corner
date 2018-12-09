@@ -47,10 +47,12 @@ def plot_hdr1d(data, prob, bins = 20, smooth = True, **kwargs):
         plt.plot(xp, yp, **kwargs)
 
 
-def plot_hdr2d(xData, yData, prob, regions = [10, 68], colors = None, **kwargs):
+def plot_hdr2d(xData, yData, prob, regions = [10, 68, 95], colors = None, **kwargs):
     # Add default parameters
     if 's' not in kwargs:
-        kwargs['s'] = 2
+        kwargs['s'] = 10
+    if 'marker' not in kwargs:
+        kwargs['marker'] = 'o'
     # Remove possible duplicated parameters
     for key in ['c', 'color']:
         if key in kwargs:
@@ -58,7 +60,7 @@ def plot_hdr2d(xData, yData, prob, regions = [10, 68], colors = None, **kwargs):
     #        
     if regions is None:
         inds = np.argsort(prob)
-        plt.scatter(xData[inds], yData[inds], c = prob[inds], **kwargs)
+        plt.scatter(xData[inds], yData[inds], c = np.log10(prob[inds]), **kwargs)
     else:
         if colors is None:
             colors = sns.color_palette("Greys", n_colors = len(regions))
