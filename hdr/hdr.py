@@ -106,9 +106,7 @@ def plot_best_fit(xData, yData = None, prob = None, best = None, kwargsDot = {},
         except NameError:
             bestY = best[yData.name]
         plt.axhline(bestY, **kwargs)
-        if len(kwargsDot) == 0:
-           plt.plot(bestX, bestY, marker = 'o', markersize = 5)
-        else:
+        if len(kwargsDot) != 0:
            plt.plot(bestX, bestY, **kwargsDot)
 
 
