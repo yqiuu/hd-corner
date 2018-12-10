@@ -177,12 +177,9 @@ class corner(sns.PairGrid):
             ax.set_xlabel(label)
 
 
-    def set_xlim(self, bounds):
+    def set_range(self, bounds):
         for ax, b in zip(self.axes[-1, :], bounds):
             ax.set_xlim(*b)
-
-
-    def set_ylim(self, bounds):
         for ax, b in zip(self.axes[:, 0], bounds):
             ax.set_ylim(*b)
 
@@ -192,12 +189,9 @@ class corner(sns.PairGrid):
             ax.set_ylim(*b)
 
 
-    def set_xticks(self, ticks):
+    def set_ticks(self, ticks):
         for ax, t in zip(self.axes[-1, :], ticks):
             ax.set_xticks(t)
-
-
-    def set_yticks(self, ticks):
         for ax, t in zip(self.axes[:, 0], ticks):
             ax.set_yticks(t)
 
