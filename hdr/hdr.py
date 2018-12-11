@@ -5,13 +5,16 @@ import seaborn as sns
 from scipy.interpolate import InterpolatedUnivariateSpline as spl
 
 
-__all__ = ['get_hdr',
-           'get_hdr_bounds',
-           'plot_hdr1d',
-           'plot_hdr2d',
-           'plot_hdr_bounds',
-           'plot_best_fit',
-           'corner']
+__all__ = [
+    'get_hdr',
+    'get_hdr_bounds',
+    'plot_hdr1d',
+    'plot_hdr2d',
+    'plot_colormap',
+    'plot_hdr_bounds',
+    'plot_best_fit',
+    'corner'
+]
 
 
 def get_hdr(prob, q = 68):
@@ -47,7 +50,7 @@ def plot_hdr1d(data, prob, bins = 20, smooth = True, **kwargs):
         plt.plot(xp, yp, **kwargs)
 
 
-def plot_hdr2d(xData, yData, prob, regions = [10, 68, 95], colors = None, **kwargs):
+def set_default_params(kwargs):
     # Add default parameters
     if 's' not in kwargs:
         kwargs['s'] = 10
@@ -57,18 +60,24 @@ def plot_hdr2d(xData, yData, prob, regions = [10, 68, 95], colors = None, **kwar
     for key in ['c', 'color']:
         if key in kwargs:
             kwargs.pop(key)
-    #        
-    if regions is None:
-        inds = np.argsort(prob)
-        plt.scatter(xData[inds], yData[inds], c = np.log10(prob[inds]), **kwargs)
-    else:
-        if colors is None:
-            colors = sns.color_palette("Greys", n_colors = len(regions))
-        for q, c in zip(np.sort(regions)[::-1], colors):
-            inds, _ = get_hdr(prob, q)
-            if type(c) is not str:
-                c = [c]
-            plt.scatter(xData[inds], yData[inds], c = c, **kwargs)
+    return kwargs
+
+
+def plot_hdr2d(xData, yData, prob, regions = [10, 68, 95], colors = None, **kwargs):
+    kwargs = set_default_params(kwargs)
+    if colors is None:
+        colors = sns.color_palette("Greys", n_colors = len(regions))
+    for q, c in zip(np.sort(regions)[::-1], colors):
+        inds, _ = get_hdr(prob, q)
+        if type(c) is not str:
+            c = [c]
+        plt.scatter(xData[inds], yData[inds], c = c, **kwargs)
+
+
+def plot_colormap(xData, yData, prob, frac = 100., **kwargs):
+    kwargs = set_default_params(kwargs)
+    inds = np.argsort(prob)[int((1 - frac/100.)*len(prob)):]
+    plt.scatter(xData[inds], yData[inds], c = np.log10(prob[inds]), **kwargs)
 
 
 def plot_hdr_bounds(xData, yData = None, prob = None, regions = [68], **kwargs):
