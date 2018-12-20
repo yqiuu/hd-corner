@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.interpolate import InterpolatedUnivariateSpline as spl
+from corner import quantile
 
 
 __all__ = [
@@ -17,8 +18,8 @@ __all__ = [
 ]
 
 
-def get_hdr(prob, q = 68):
-    inds = prob > np.percentile(prob, q = 100. - q)
+def get_hdr(prob, q = 68, weights = None):
+    inds = prob > quantile(prob, q = 1. - q/100., weights = weights)
     if any(inds):
         return inds, min(prob[inds])
     else:
@@ -27,8 +28,8 @@ def get_hdr(prob, q = 68):
         return inds, maximum
 
 
-def get_hdr_bounds(data, prob, q = 68):
-    inds, p = get_hdr(prob, q = q)
+def get_hdr_bounds(data, prob, q = 68, weights = None):
+    inds, p = get_hdr(prob, q = q, weights = weights)
     hdr = data[inds]
     return min(hdr), max(hdr), p
 
@@ -170,6 +171,8 @@ class corner(sns.PairGrid):
 
 
     def map_lower_with_prob(self, func, **kwargs):
+        if func == plot_colormap:
+            kwargs.update(_grid = self)
         self.map_lower(func, prob = self.prob, **kwargs)
 
 
