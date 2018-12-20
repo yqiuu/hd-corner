@@ -129,9 +129,7 @@ class corner(sns.PairGrid):
         kwargs['despine']     = False
         super().__init__(data, **kwargs)
         #
-        if norm is None:
-            prob = prob/max(prob)
-        else:
+        if norm is not None:
             prob = prob/norm
         self.prob = prob
         #
