@@ -185,15 +185,15 @@ class corner(sns.PairGrid):
         return cax
 
 
-    def set_labels(self, labels):
+    def set_labels(self, labels, **kwargs):
         if len(labels) != len(self.axes):
             raise ValueError("label number mismatch")
         # Set column labels
         for ax, label in zip(self.axes[1:, 0], labels[1:]):
-            ax.set_ylabel(label)
+            ax.set_ylabel(label, **kwargs)
         # Set row labels
         for ax, label in zip(self.axes[-1, :], labels):
-            ax.set_xlabel(label)
+            ax.set_xlabel(label, **kwargs)
 
 
     def set_range(self, bounds):
@@ -208,11 +208,11 @@ class corner(sns.PairGrid):
             ax.set_ylim(*b)
 
 
-    def set_ticks(self, ticks):
+    def set_ticks(self, ticks, **kwargs):
         for ax, t in zip(self.axes[-1, :], ticks):
-            ax.set_xticks(t)
+            ax.set_xticks(t, **kwargs)
         for ax, t in zip(self.axes[:, 0], ticks):
-            ax.set_yticks(t)
+            ax.set_yticks(t, **kwargs)
 
 
     def set_diag_yticks(self, ticks):
