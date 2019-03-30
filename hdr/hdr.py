@@ -19,6 +19,22 @@ __all__ = [
 ]
 
 
+def _set_default_params(kwargs, cmap = None):
+    # Add default parameters
+    if 's' not in kwargs:
+        kwargs.update(s = 10)
+    if 'marker' not in kwargs:
+        kwargs.update(marker = 'o')
+    # Remove possible duplicated parameters
+    for key in ['c', 'color']:
+        if key in kwargs:
+            kwargs.pop(key)
+    #
+    if cmap is not None:
+        kwargs.update(cmap = cmap)
+    return kwargs
+
+
 def get_hdr(prob, q = 68, weights = None):
     inds = prob > quantile(prob, q = 1. - q/100., weights = weights)
     if any(inds):
@@ -52,19 +68,6 @@ def plot_hdr1d(data, prob, bins = 20, smooth = True, **kwargs):
         plt.plot(xp, yp, **kwargs)
 
 
-def set_default_params(kwargs):
-    # Add default parameters
-    if 's' not in kwargs:
-        kwargs['s'] = 10
-    if 'marker' not in kwargs:
-        kwargs['marker'] = 'o'
-    # Remove possible duplicated parameters
-    for key in ['c', 'color']:
-        if key in kwargs:
-            kwargs.pop(key)
-    return kwargs
-
-
 def plot_marginal2d(xData, yData, **kwargs):
     kwargs.update(plot_datapoints = False, plot_density = False, no_fill_contours = True)
     if 'color' not in kwargs:
@@ -73,7 +76,7 @@ def plot_marginal2d(xData, yData, **kwargs):
 
 
 def plot_hdr2d(xData, yData, prob, regions = [10, 68, 95], colors = None, **kwargs):
-    kwargs = set_default_params(kwargs)
+    kwargs = _set_default_params(kwargs)
     if colors is None:
         colors = sns.color_palette("Greys", n_colors = len(regions))
     for q, c in zip(np.sort(regions)[::-1], colors):
@@ -85,7 +88,7 @@ def plot_hdr2d(xData, yData, prob, regions = [10, 68, 95], colors = None, **kwar
 
 def plot_colormap(xData, yData, prob, frac = 100., **kwargs):
     grid = kwargs['_grid']; kwargs.pop('_grid')
-    kwargs = set_default_params(kwargs)
+    kwargs = _set_default_params(kwargs, cmap = 'jet')
     inds = np.argsort(prob)[int((1 - frac/100.)*len(prob)):]
     grid.cplot = plt.scatter(xData[inds], yData[inds], c = np.log10(prob[inds]), **kwargs)
 
@@ -130,7 +133,7 @@ def plot_best_fit(xData, yData = None, prob = None, best = None, kwargsDot = {},
 
 
 class corner(sns.PairGrid):
-    def __init__(self, data, prob, quick = True, norm = None, **kwargs):
+    def __init__(self, data, prob, default = True, norm = None, **kwargs):
         if type(data) is not pd.DataFrame:
             data = pd.DataFrame(data, columns = ['x%d'%i for i in range(data.shape[-1])])
         kwargs['diag_sharey'] = False
@@ -141,10 +144,10 @@ class corner(sns.PairGrid):
             prob = prob/norm
         self.prob = prob
         #
-        if quick:
+        if default:
             self.map_diag(sns.kdeplot, legend = False, color = 'k')
-            self.map_diag_with_prob(plot_hdr1d)
-            self.map_lower_with_prob(plot_hdr2d)
+            self.map_lower(plot_marginal2d, color = 'k', levels = [0.68, 0.95])
+            self.map_lower_with_prob(plot_colormap)
         else:
             self.map_diag(self._do_nothing)
         for iA, ax in enumerate(self.diag_axes):
