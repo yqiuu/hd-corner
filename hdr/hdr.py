@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.interpolate import InterpolatedUnivariateSpline as spl
-from corner import quantile
+from corner import quantile, hist2d
 
 
 __all__ = [
@@ -11,6 +11,7 @@ __all__ = [
     'get_hdr_bounds',
     'plot_hdr1d',
     'plot_hdr2d',
+    'plot_marginal2d',
     'plot_colormap',
     'plot_hdr_bounds',
     'plot_best_fit',
@@ -62,6 +63,13 @@ def set_default_params(kwargs):
         if key in kwargs:
             kwargs.pop(key)
     return kwargs
+
+
+def plot_marginal2d(xData, yData, **kwargs):
+    kwargs.update(plot_datapoints = False, plot_density = False, no_fill_contours = True)
+    if 'color' not in kwargs:
+        kwargs.update(color = 'k')
+    hist2d(np.asarray(xData), np.asarray(yData), **kwargs)
 
 
 def plot_hdr2d(xData, yData, prob, regions = [10, 68, 95], colors = None, **kwargs):
@@ -134,6 +142,7 @@ class corner(sns.PairGrid):
         self.prob = prob
         #
         if quick:
+            self.map_diag(sns.kdeplot, legend = False, color = 'k')
             self.map_diag_with_prob(plot_hdr1d)
             self.map_lower_with_prob(plot_hdr2d)
         else:
@@ -143,6 +152,7 @@ class corner(sns.PairGrid):
             ax.set_xlabel('')
             plt.setp(ax.get_xticklabels(), visible = False)
             ax.yaxis.tick_right()
+            ax.set_yticklabels([])
             #
             ax = self.axes[iA, iA]
             ax.tick_params(axis = 'y', which = 'both', length = 0.)
