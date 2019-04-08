@@ -90,7 +90,7 @@ def plot_colormap(xData, yData, prob, frac = 100., **kwargs):
     grid = kwargs['_grid']; kwargs.pop('_grid')
     kwargs = _set_default_params(kwargs, cmap = 'jet')
     inds = np.argsort(prob)[int((1 - frac/100.)*len(prob)):]
-    grid.cplot = plt.scatter(xData[inds], yData[inds], c = np.log10(prob[inds]), **kwargs)
+    grid._cplot = plt.scatter(xData[inds], yData[inds], c = np.log10(prob[inds]), **kwargs)
 
 
 def plot_hdr_bounds(xData, yData = None, prob = None, regions = [68], **kwargs):
@@ -169,7 +169,8 @@ class corner(sns.PairGrid):
         plt.subplots_adjust(hspace = 0., wspace = 0.)
         #
         self.cax = None
-        self.cplot = None
+        self.cbar = None
+        self._cplot = None
 
 
     def _add_axis_labels(self):
@@ -193,9 +194,10 @@ class corner(sns.PairGrid):
 
     def add_caxis(self, rect = [0.1, 0.0, 0.8, 0.01], orientation = 'horizontal', **kwargs):
         cax = self.fig.add_axes(rect)
-        self.fig.colorbar(self.cplot, cax = cax, orientation = orientation, **kwargs)
+        cbar = self.fig.colorbar(self._cplot, cax = cax, orientation = orientation, **kwargs)
         self.cax = cax
-        return cax
+        self.cbar = cbar
+        return cax, cbar
 
 
     def set_labels(self, labels, **kwargs):
