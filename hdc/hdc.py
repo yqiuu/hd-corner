@@ -15,7 +15,7 @@ __all__ = [
     'plot_colormap',
     'plot_hdr_bounds',
     'plot_best_fit',
-    'corner'
+    'Corner'
 ]
 
 
@@ -87,10 +87,9 @@ def plot_hdr2d(xData, yData, prob, regions = [10, 68, 95], colors = None, **kwar
 
 
 def plot_colormap(xData, yData, prob, frac = 100., **kwargs):
-    grid = kwargs['_grid']; kwargs.pop('_grid')
     kwargs = _set_default_params(kwargs, cmap = 'jet')
     inds = np.argsort(prob)[int((1 - frac/100.)*len(prob)):]
-    grid._cplot = plt.scatter(xData[inds], yData[inds], c = np.log10(prob[inds]), **kwargs)
+    plt.scatter(xData[inds], yData[inds], c = np.log10(prob[inds]), **kwargs)
 
 
 def plot_hdr_bounds(xData, yData = None, prob = None, regions = [68], **kwargs):
@@ -132,72 +131,69 @@ def plot_best_fit(xData, yData = None, prob = None, best = None, kwargsDot = {},
            plt.plot(bestX, bestY, **kwargsDot)
 
 
-class corner(sns.PairGrid):
-    def __init__(self, data, prob, default = True, norm = None, **kwargs):
-        if type(data) is not pd.DataFrame:
-            data = pd.DataFrame(data, columns = ['x%d'%i for i in range(data.shape[-1])])
-        kwargs['diag_sharey'] = False
-        kwargs['despine']     = False
-        super().__init__(data, **kwargs)
-        #
-        if norm is not None:
-            prob = prob/norm
-        self.prob = prob
-        #
-        if default:
-            self.map_diag(sns.kdeplot, legend = False, color = 'k')
-            self.map_lower(plot_marginal2d, color = 'k', levels = [0.68, 0.95])
-            self.map_lower_with_prob(plot_colormap)
+class Corner:
+    def __init__(self, ndim, mode=1, figsize=None):
+        if mode == 0:
+            ndim = ndim - 1
+        if figsize == None:
+            figsize = (3*ndim, 3*ndim)
+        fig, axes = plt.subplots(
+            figsize=figsize, nrows=ndim, ncols=ndim, sharex=True,
+        )
+        self.ndim = ndim
+        self.fig = fig
+        self.axes = axes
+        self._mode = mode
+        if mode == 0:
+            self._origin = 0
+            self.diag_axes = None
         else:
-            self.map_diag(self._do_nothing)
-        for iA, ax in enumerate(self.diag_axes):
-            ax.axis('on')
-            ax.set_xlabel('')
-            plt.setp(ax.get_xticklabels(), visible = False)
-            ax.yaxis.tick_right()
-            ax.set_yticklabels([])
-            #
-            ax = self.axes[iA, iA]
-            ax.tick_params(axis = 'y', which = 'both', length = 0.)
-            if iA == 0:
-                plt.setp(ax.get_yticklabels(), visible = False)
-        #
-        ndim = len(self.axes)
-        for iRow in range(ndim):
-            for iCol in range(iRow + 1, ndim):
-                self.axes[iRow, iCol].axis('off')
-        plt.subplots_adjust(hspace = 0., wspace = 0.)
-        #
-        self.cax = None
-        self.cbar = None
-        self._cplot = None
+            self._origin = 1
+            self.diag_axes = np.asarray([axes[i, i] for i in range(ndim)])
+        if mode < 2:
+            for i_row in range(ndim):
+                for i_col in range(i_row + 1, ndim):
+                    axes[i_row, i_col].axis('off')
+        self._hide_yticklabels()
+        plt.subplots_adjust(wspace=0., hspace=0.)
 
 
-    def _add_axis_labels(self):
-        # Disable the origianl class method
-        pass
-
-    
-    def _do_nothing(self, xData = None, yData = None, **kwargs):
-        pass
-
-    
-    def map_diag_with_prob(self, func, **kwargs):
-        self.map_diag(func, prob = self.prob, **kwargs)
-
-
-    def map_lower_with_prob(self, func, **kwargs):
-        if func == plot_colormap:
-            kwargs.update(_grid = self)
-        self.map_lower(func, prob = self.prob, **kwargs)
+    def map_lower(self, func, data_xy, data_z=None, **kwargs):
+        origin = self._origin
+        for i_row in range(origin, self.ndim):
+            for i_col in range(i_row - origin + 1):
+                plt.sca(self.axes[i_row, i_col])
+                if data_z is None:
+                    func(
+                        data_xy[:, i_col], data_xy[:, i_row - origin + 1],
+                        **kwargs
+                    )
+                else:
+                    func(
+                        data_xy[:, i_col], data_xy[:, i_row - origin + 1],
+                        data_z, **kwargs
+                    )
 
 
-    def add_caxis(self, rect = [0.1, 0.0, 0.8, 0.01], orientation = 'horizontal', **kwargs):
-        cax = self.fig.add_axes(rect)
-        cbar = self.fig.colorbar(self._cplot, cax = cax, orientation = orientation, **kwargs)
-        self.cax = cax
-        self.cbar = cbar
-        return cax, cbar
+    def map_upper(self, func, data_xy, data_z=None, **kwargs):
+        if self._mode < 2:
+            raise ValueError("Wrong mode to plot upper panels.")
+        for i_row in range(self.ndim - 1):
+            for i_col in range(i_row + 1, self.ndim):
+                plt.sca(self.axes[i_row, i_col])
+                if data_z is None:
+                    func(data_xy[:, i_col], data_xy[:, i_row], **kwargs)
+                else:
+                    func(data_xy[:, i_col], data_xy[:, i_row], data_z, **kwargs)
+
+
+    def map_diag(self, func, data_xy, data_z=None, **kwargs):
+        for i_a, ax in enumerate(self.diag_axes):
+            plt.sca(ax)
+            if data_z is None:
+                func(data_xy[:, i_a], **kwargs)
+            else:
+                func(data_xy[:, i_a], data_z, **kwargs)
 
 
     def set_labels(self, labels, **kwargs):
@@ -211,16 +207,18 @@ class corner(sns.PairGrid):
             ax.set_xlabel(label, **kwargs)
 
 
-    def set_range(self, bounds):
-        for ax, b in zip(self.axes[-1, :], bounds):
-            ax.set_xlim(*b)
-        for ax, b in zip(self.axes[:, 0], bounds):
-            ax.set_ylim(*b)
+    def set_ranges(self, ranges):
+        for i_row in range(self.ndim):
+            for i_col in range(self.ndim):
+                if i_row != i_col:
+                    self.axes[i_row, i_col].set_ylim(*ranges[i_col])
+        for ax, r in zip(self.axes[-1], ranges):
+            ax.set_xlim(*r)
 
 
-    def set_diag_ylim(self, bounds):
-        for ax, b in zip(self.diag_axes, bounds):
-            ax.set_ylim(*b)
+    def set_diag_ylim(self, ranges):
+        for ax, r in zip(self.diag_axes, ranges):
+            ax.set_ylim(*r)
 
 
     def set_ticks(self, ticks, **kwargs):
@@ -233,3 +231,20 @@ class corner(sns.PairGrid):
     def set_diag_yticks(self, ticks):
         for ax, t in zip(self.diag_axes, ticks):
             ax.set_yticks(t)
+
+
+    def add_caxis(self,
+        rect=[0.1, 0.0, 0.8, 0.01], orientation='horizontal', **kwargs
+    ):
+        cax = self.fig.add_axes(rect)
+        cbar = self.fig.colorbar(
+            self._cplot, cax = cax, orientation = orientation, **kwargs
+        )
+        self.cax = cax
+        self.cbar = cbar
+        return cax, cbar
+
+
+    def _hide_yticklabels(self):
+        for ax in self.axes[:, 1:].flat:
+            ax.set_yticklabels([])
