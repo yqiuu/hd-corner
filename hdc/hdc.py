@@ -86,10 +86,27 @@ def plot_hdr2d(xData, yData, prob, regions = [10, 68, 95], colors = None, **kwar
         plt.scatter(xData[inds], yData[inds], c = c, **kwargs)
 
 
-def plot_colormap(xData, yData, prob, frac = 100., **kwargs):
-    kwargs = _set_default_params(kwargs, cmap = 'jet')
-    inds = np.argsort(prob)[int((1 - frac/100.)*len(prob)):]
-    plt.scatter(xData[inds], yData[inds], c = np.log10(prob[inds]), **kwargs)
+def plot_colormap(
+    data_x, data_y, data_z, order='none', frac=1., scale='linear', **kwargs
+):
+    if order == 'ascending':
+        inds = np.argsort(data_z)
+    elif order == 'descending':
+        inds = np.argsort(data_z)[::-1]
+    elif order == 'none':
+        inds = np.arange(len(data_z))
+    else:
+        raise ValueError(
+            "Choose order from 'ascending', 'descending' and 'none'."
+        )
+    if scale == 'log':
+        data_z = np.log10(data_z)
+    elif scale == 'linear':
+        pass
+    else:
+        raise ValueError("Choose scale from 'linear' and 'log'.")
+    inds = inds[int((1 - frac)*len(data_z)):]
+    return plt.scatter(data_x[inds], data_y[inds], c=data_z[inds], **kwargs)
 
 
 def plot_hdr_bounds(xData, yData = None, prob = None, regions = [68], **kwargs):
