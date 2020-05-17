@@ -248,7 +248,7 @@ class Corner:
     ):
         cax = self.fig.add_axes(rect)
         cbar = self.fig.colorbar(
-            self._cplot, cax = cax, orientation = orientation, **kwargs
+            self._plot, cax=cax, orientation=orientation, **kwargs
         )
         self.cax = cax
         self.cbar = cbar
