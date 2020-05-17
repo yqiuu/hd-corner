@@ -175,33 +175,26 @@ class Corner:
         plt.subplots_adjust(wspace=0., hspace=0.)
 
 
-    def map_lower(self, func, data_xy, data_z=None, **kwargs):
+    def map_corner(self, func, data_xy, data_z=None, loc='lower', **kwargs):
+        def plot(d_x, d_y):
+            if data_z is None:
+                self._plot = func(d_x, d_y, **kwargs)
+            else:
+                self._plot = func(d_x, d_y, data_z, **kwargs)
+
         origin = self._origin
-        for i_row in range(origin, self.ndim):
-            for i_col in range(i_row - origin + 1):
-                plt.sca(self.axes[i_row, i_col])
-                if data_z is None:
-                    func(
-                        data_xy[:, i_col], data_xy[:, i_row - origin + 1],
-                        **kwargs
-                    )
-                else:
-                    func(
-                        data_xy[:, i_col], data_xy[:, i_row - origin + 1],
-                        data_z, **kwargs
-                    )
-
-
-    def map_upper(self, func, data_xy, data_z=None, **kwargs):
-        if self._mode < 2:
-            raise ValueError("Wrong mode to plot upper panels.")
-        for i_row in range(self.ndim - 1):
-            for i_col in range(i_row + 1, self.ndim):
-                plt.sca(self.axes[i_row, i_col])
-                if data_z is None:
-                    func(data_xy[:, i_col], data_xy[:, i_row], **kwargs)
-                else:
-                    func(data_xy[:, i_col], data_xy[:, i_row], data_z, **kwargs)
+        if loc == 'lower':
+            for i_row in range(origin, self.ndim):
+                for i_col in range(i_row - origin + 1):
+                    plt.sca(self.axes[i_row, i_col])
+                    plot(data_xy[:, i_col], data_xy[:, i_row - origin + 1])
+        elif loc == 'upper':
+            for i_row in range(self.ndim - 1):
+                for i_col in range(i_row + 1, self.ndim):
+                    plt.sca(self.axes[i_row, i_col])
+                    plot(data_xy[:, i_col], data_xy[:, i_row])
+        else:
+            raise ValueError("Choose loc from 'lower' and 'upper'.")
 
 
     def map_diag(self, func, data_xy, data_z=None, **kwargs):
