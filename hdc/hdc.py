@@ -167,7 +167,7 @@ class Corner:
         if mode == 0:
             ndim = ndim - 1
         if figsize == None:
-            figsize = (3*ndim, 3*ndim)
+            figsize = (2.5*ndim, 2.5*ndim)
         fig, axes = plt.subplots(
             figsize=figsize, nrows=ndim, ncols=ndim, sharex=True,
         )
