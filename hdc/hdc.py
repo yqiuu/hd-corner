@@ -15,6 +15,7 @@ __all__ = [
     'plot_colormap',
     'plot_hdr_bounds',
     'plot_best_fit',
+    'corner_optimization',
     'Corner'
 ]
 
@@ -146,6 +147,19 @@ def plot_best_fit(xData, yData = None, prob = None, best = None, kwargsDot = {},
         plt.axhline(bestY, **kwargs)
         if len(kwargsDot) != 0:
            plt.plot(bestX, bestY, **kwargsDot)
+
+
+def corner_optimization(
+    data_xy, data_z, minimizer=True, figsize=None, scale='log', **kwargs
+):
+    ndim = len(data_xy[0])
+    order = 'descending' if minimizer else 'ascending'
+    corner = Corner(ndim, 0, figsize=figsize)
+    corner.map_corner(
+        plot_colormap, data_xy, data_z, order=order, scale=scale, **kwargs
+    )
+    corner.set_labels(['x%d'%i for i in range(ndim)])
+    return corner
 
 
 class Corner:
