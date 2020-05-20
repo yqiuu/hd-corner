@@ -207,13 +207,15 @@ class Corner:
 
 
     def set_labels(self, labels, **kwargs):
-        if len(labels) != len(self.axes):
+        origin = self._origin
+        naxis = self.ndim
+        if len(labels) != naxis + 1 - origin :
             raise ValueError("label number mismatch")
         # Set column labels
-        for ax, label in zip(self.axes[1:, 0], labels[1:]):
+        for ax, label in zip(self.axes[origin:, 0], labels[1:]):
             ax.set_ylabel(label, **kwargs)
         # Set row labels
-        for ax, label in zip(self.axes[-1, :], labels):
+        for ax, label in zip(self.axes[-1, :naxis], labels[:naxis]):
             ax.set_xlabel(label, **kwargs)
 
 
