@@ -168,9 +168,7 @@ class Corner:
             ndim = ndim - 1
         if figsize == None:
             figsize = (2.5*ndim, 2.5*ndim)
-        fig, axes = plt.subplots(
-            figsize=figsize, nrows=ndim, ncols=ndim, sharex=True,
-        )
+        fig, axes = plt.subplots(figsize=figsize, nrows=ndim, ncols=ndim)
         self.ndim = ndim
         self.fig = fig
         self.axes = axes
@@ -234,12 +232,13 @@ class Corner:
 
 
     def set_ranges(self, ranges):
+        origin = self._origin
         for i_row in range(self.ndim):
             for i_col in range(self.ndim):
-                if i_row != i_col:
-                    self.axes[i_row, i_col].set_ylim(*ranges[i_col])
-        for ax, r in zip(self.axes[-1], ranges):
-            ax.set_xlim(*r)
+                ax = self.axes[i_row, i_col]
+                ax.set_xlim(*ranges[i_col])
+                if i_row != i_col or origin == 0:
+                    ax.set_ylim(*ranges[i_row - origin + 1])
 
 
     def set_diag_ylim(self, ranges):
@@ -248,10 +247,13 @@ class Corner:
 
 
     def set_ticks(self, ticks, **kwargs):
-        for ax, t in zip(self.axes[-1, :], ticks):
-            ax.set_xticks(t, **kwargs)
-        for ax, t in zip(self.axes[:, 0], ticks):
-            ax.set_yticks(t, **kwargs)
+        origin = self._origin
+        for i_row in range(self.ndim):
+            for i_col in range(self.ndim):
+                ax = self.axes[i_row, i_col]
+                ax.set_xticks(ticks[i_col])
+                if i_row != i_col or origin == 0:
+                    ax.set_yticks(ticks[i_row - origin + 1])
 
 
     def set_diag_yticks(self, ticks):
