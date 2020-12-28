@@ -36,14 +36,14 @@ def _set_default_params(kwargs, cmap = None):
     return kwargs
 
 
-def get_hdr(prob, q = 68, weights = None):
-    inds = prob > quantile(prob, q = 1. - q/100., weights = weights)
-    if any(inds):
-        return inds, min(prob[inds])
+def get_hdr(prob, q=.68, weights=None):
+    cond = prob > quantile(prob, q=1.-q, weights=weights)
+    if any(cond):
+        return cond, min(prob[cond])
     else:
         maximum = max(prob)
-        inds = prob == maximum
-        return inds, maximum
+        cond = prob == maximum
+        return cond, maximum
 
 
 def get_hdr_bounds(data, prob, q = 68, weights = None):
@@ -76,15 +76,20 @@ def plot_marginal2d(xData, yData, **kwargs):
     hist2d(np.asarray(xData), np.asarray(yData), **kwargs)
 
 
-def plot_hdr2d(xData, yData, prob, regions = [10, 68, 95], colors = None, **kwargs):
+def plot_hdr2d(
+    data_x, data_y, data_z, weights=None, regions=[.1, .68, .95], colors=None, **kwargs
+):
     kwargs = _set_default_params(kwargs)
     if colors is None:
-        colors = sns.color_palette("Greys", n_colors = len(regions))
-    for q, c in zip(np.sort(regions)[::-1], colors):
-        inds, _ = get_hdr(prob, q)
+        colors = sns.color_palette("Greys_r", n_colors=len(regions))
+    cond_prev = np.full(len(data_z), False)
+    for q, c in zip(np.sort(regions), colors):
+        cond, _ = get_hdr(data_z, q, weights)
+        cond_curr = cond & ~cond_prev
+        cond_prev = cond
         if type(c) is not str:
             c = [c]
-        plt.scatter(xData[inds], yData[inds], c = c, **kwargs)
+        plt.scatter(data_x[cond_curr], data_y[cond_curr], c=c, **kwargs)
 
 
 def plot_colormap(
