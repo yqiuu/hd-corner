@@ -202,6 +202,7 @@ class Corner:
         kwargs_1d.setdefault('bins', 20)
         kwargs_1d.setdefault('color', color)
         kwargs_1d.setdefault('histtype', 'step')
+        kwargs_1d.setdefault('density', True)
         if kwargs_2d is None:
             kwargs_2d = {}
         kwargs_2d.setdefault('color', color)
