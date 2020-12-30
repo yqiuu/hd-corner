@@ -69,11 +69,11 @@ def plot_hdr1d(data, prob, bins = 20, smooth = True, **kwargs):
         plt.plot(xp, yp, **kwargs)
 
 
-def plot_marginal2d(xData, yData, **kwargs):
-    kwargs.update(plot_datapoints = False, plot_density = False, no_fill_contours = True)
-    if 'color' not in kwargs:
-        kwargs.update(color = 'k')
-    hist2d(np.asarray(xData), np.asarray(yData), **kwargs)
+def plot_marginal2d(data_x, data_y, **kwargs):
+    kwargs.update(plot_datapoints=False, plot_density=False, no_fill_contours=True)
+    kwargs.setdefault('color', 'k')
+    kwargs.setdefault('levels', [.38, .68, .95])
+    hist2d(np.asarray(data_x), np.asarray(data_y), **kwargs)
 
 
 def plot_hdr2d(
@@ -190,6 +190,21 @@ class Corner:
                     axes[i_row, i_col].axis('off')
         self._hide_yticklabels()
         plt.subplots_adjust(wspace=0., hspace=0.)
+
+
+    def marginal_distributions(
+        self, data_xy, color='b', figsize=None, kwargs_1d=None, kwargs_2d=None
+    ):
+        if kwargs_1d is None:
+            kwargs_1d = {}
+        kwargs_1d.setdefault('bins', 20)
+        kwargs_1d.setdefault('color', color)
+        kwargs_1d.setdefault('histtype', 'step')
+        if kwargs_2d is None:
+            kwargs_2d = {}
+        kwargs_2d.setdefault('color', color)
+        self.map_diag(plt.hist, data_xy, **kwargs_1d)
+        self.map_corner(plot_marginal2d, data_xy, **kwargs_2d)
 
 
     def map_corner(self, func, data_xy, data_z=None, loc='lower', **kwargs):
