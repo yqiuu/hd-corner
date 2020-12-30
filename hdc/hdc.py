@@ -81,15 +81,17 @@ def plot_hdr2d(
 ):
     kwargs = _set_default_params(kwargs)
     if colors is None:
-        colors = sns.color_palette("Greys_r", n_colors=len(regions))
+        colors = sns.color_palette("Greys", n_colors=len(regions))
+    cond_arr = []
     cond_prev = np.full(len(data_z), False)
-    for q, c in zip(np.sort(regions), colors):
+    for q in np.sort(regions):
         cond, _ = get_hdr(data_z, q, weights)
-        cond_curr = cond & ~cond_prev
+        cond_arr.append(cond & ~cond_prev)
         cond_prev = cond
+    for cond, c in zip(reversed(cond_arr), colors):
         if type(c) is not str:
             c = [c]
-        plt.scatter(data_x[cond_curr], data_y[cond_curr], c=c, **kwargs)
+        plt.scatter(data_x[cond], data_y[cond], c=c, **kwargs)
 
 
 def plot_colormap(
