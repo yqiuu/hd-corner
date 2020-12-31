@@ -15,7 +15,6 @@ __all__ = [
     'plot_colormap',
     'plot_hdr_bounds',
     'plot_best_fit',
-    'corner_optimization',
     'Corner'
 ]
 
@@ -156,19 +155,6 @@ def plot_best_fit(xData, yData = None, prob = None, best = None, kwargsDot = {},
            plt.plot(bestX, bestY, **kwargsDot)
 
 
-def corner_optimization(
-    data_xy, data_z, minimizer=True, figsize=None, scale='log', **kwargs
-):
-    ndim = len(data_xy[0])
-    order = 'descending' if minimizer else 'ascending'
-    corner = Corner(ndim, 0, figsize=figsize)
-    corner.map_corner(
-        plot_colormap, data_xy, data_z, order=order, scale=scale, **kwargs
-    )
-    corner.set_labels(['x%d'%i for i in range(ndim)])
-    return corner
-
-
 class Corner:
     def __init__(self, ndim, mode=1, figsize=None):
         if mode == 0:
@@ -194,8 +180,8 @@ class Corner:
         plt.subplots_adjust(wspace=0., hspace=0.)
 
 
-    def marginal_distributions(
-        self, data_xy, color='b', figsize=None, kwargs_1d=None, kwargs_2d=None
+    def marginal_distributions(self,
+        data_xy, color='b', figsize=None, kwargs_1d=None, kwargs_2d=None
     ):
         if kwargs_1d is None:
             kwargs_1d = {}
@@ -208,6 +194,14 @@ class Corner:
         kwargs_2d.setdefault('color', color)
         self.map_diag(plt.hist, data_xy, **kwargs_1d)
         self.map_corner(plot_marginal2d, data_xy, **kwargs_2d)
+
+
+    def colormaps(self,
+        data_xy, data_z, order='descending', frac=1., scale='linear', **kwargs
+    ):
+        self.map_corner(
+            plot_colormap, data_xy, data_z, order=order, frac=frac, scale=scale, **kwargs
+        )
 
 
     def map_corner(self, func, data_xy, data_z=None, loc='lower', **kwargs):
