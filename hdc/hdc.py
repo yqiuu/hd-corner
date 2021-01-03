@@ -156,8 +156,8 @@ def plot_best_fit(xData, yData = None, prob = None, best = None, kwargsDot = {},
 
 
 class Corner:
-    def __init__(self, ndim, mode=1, figsize=None):
-        if mode == 0:
+    def __init__(self, ndim, no_diag=False, figsize=None):
+        if no_diag:
             ndim = ndim - 1
         if figsize == None:
             figsize = (2.5*ndim, 2.5*ndim)
@@ -165,14 +165,14 @@ class Corner:
         self.ndim = ndim
         self.fig = fig
         self.axes = axes
-        self._mode = mode
-        if mode == 0:
+        self._no_diag = no_diag
+        if no_diag:
             self._origin = 0
             self.diag_axes = None
         else:
             self._origin = 1
             self.diag_axes = np.asarray([axes[i, i] for i in range(ndim)])
-        if mode < 2:
+        if no_diag < 2:
             for i_row in range(ndim):
                 for i_col in range(i_row + 1, ndim):
                     axes[i_row, i_col].axis('off')
