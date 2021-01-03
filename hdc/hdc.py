@@ -157,6 +157,8 @@ def plot_best_fit(xData, yData = None, prob = None, best = None, kwargsDot = {},
 
 class Corner:
     def __init__(self, ndim, no_diag=False, figsize=None):
+        self._lbounds = np.full(ndim, np.inf, np.double)
+        self._ubounds = np.full(ndim, -np.inf, np.double)
         if no_diag:
             ndim = ndim - 1
         if figsize == None:
@@ -224,6 +226,8 @@ class Corner:
                     plot(data_xy[:, i_col], data_xy[:, i_row])
         else:
             raise ValueError("Choose loc from 'lower' and 'upper'.")
+        
+        self.set_default_axes(data_xy)
 
 
     def map_diag(self, func, data_xy, data_z=None, **kwargs):
@@ -233,6 +237,27 @@ class Corner:
                 func(data_xy[:, i_a], **kwargs)
             else:
                 func(data_xy[:, i_a], data_z, **kwargs)
+        self.set_default_axes(data_xy)
+
+
+    def set_default_axes(self, data_xy):
+        if not self._no_diag:
+            self.axes[0, 0].set_yticks([])
+        #
+        lbounds = np.min(data_xy, axis=0)
+        lbounds = np.min(np.vstack([lbounds, self._lbounds]), axis=0)
+        ubounds = np.max(data_xy, axis=0)
+        ubounds = np.max(np.vstack([ubounds, self._ubounds]), axis=0)
+        self.set_ranges(np.vstack([lbounds, ubounds]).T)
+        self._lbounds = lbounds
+        self._ubounds = ubounds
+        #
+        for ax in self.axes[-1]:
+            plt.sca(ax)
+            plt.xticks(rotation=45)
+        for ax in self.axes[:, 0]:
+            plt.sca(ax)
+            plt.yticks(rotation=45)
 
 
     def set_labels(self, labels, **kwargs):
@@ -270,7 +295,7 @@ class Corner:
                 ax = self.axes[i_row, i_col]
                 ax.set_xticks(ticks[i_col])
                 if i_row != i_col or origin == 0:
-                    ax.set_yticks(ticks[i_row - origin + 1])
+                    ax.set_yticks(ticks[i_row - origin + 1], **kwargs)
 
 
     def set_diag_yticks(self, ticks):
