@@ -95,17 +95,17 @@ def plot_hdr2d(
 
 
 def plot_colormap(
-    data_x, data_y, data_z, order='none', frac=1., scale='linear', **kwargs
+    data_x, data_y, data_z, mode='none', frac=1., scale='linear', **kwargs
 ):
-    if order == 'ascending':
+    if mode == 'maximize':
         inds = np.argsort(data_z)
-    elif order == 'descending':
+    elif mode == 'minimize':
         inds = np.argsort(data_z)[::-1]
-    elif order == 'none':
+    elif mode == 'none':
         inds = np.arange(len(data_z))
     else:
         raise ValueError(
-            "Choose order from 'ascending', 'descending' and 'none'."
+            "Choose mode from 'maximize', 'minimize' and 'none'."
         )
     if scale == 'log':
         data_z = np.log10(data_z)
@@ -200,10 +200,10 @@ class Corner:
 
 
     def colormaps(self,
-        data_xy, data_z, order='descending', frac=1., scale='linear', **kwargs
+        data_xy, data_z, mode='minimize', frac=1., scale='linear', **kwargs
     ):
         self.map_corner(
-            plot_colormap, data_xy, data_z, order=order, frac=frac, scale=scale, **kwargs
+            plot_colormap, data_xy, data_z, mode=mode, frac=frac, scale=scale, **kwargs
         )
 
 
