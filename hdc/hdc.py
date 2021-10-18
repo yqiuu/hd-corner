@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib import ticker
 import seaborn as sns
 from scipy.interpolate import InterpolatedUnivariateSpline as spl
 from corner import quantile, hist2d
@@ -251,13 +252,16 @@ class Corner:
         self.set_ranges(np.vstack([lbounds, ubounds]).T)
         self._lbounds = lbounds
         self._ubounds = ubounds
+        n_ticks = 4
         #
         for ax in self.axes[-1]:
             plt.sca(ax)
             plt.xticks(rotation=45)
+            ax.xaxis.set_major_locator(ticker.MaxNLocator(n_ticks, prune='lower'))
         for ax in self.axes[:, 0]:
             plt.sca(ax)
             plt.yticks(rotation=45)
+            ax.yaxis.set_major_locator(ticker.MaxNLocator(n_ticks, prune='lower'))
 
 
     def set_labels(self, labels, **kwargs):
