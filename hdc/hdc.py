@@ -257,11 +257,18 @@ class Corner:
         for ax in self.axes[-1]:
             plt.sca(ax)
             plt.xticks(rotation=45)
-            ax.xaxis.set_major_locator(ticker.MaxNLocator(n_ticks, prune='lower'))
         for ax in self.axes[:, 0]:
             plt.sca(ax)
             plt.yticks(rotation=45)
-            ax.yaxis.set_major_locator(ticker.MaxNLocator(n_ticks, prune='lower'))
+        origin = self._origin
+        for i_row in range(origin, self.ndim):
+            for i_col in range(i_row - origin + 1):
+                ax = self.axes[i_row, i_col]
+                ax.xaxis.set_major_locator(ticker.MaxNLocator(n_ticks, prune='lower'))
+                ax.yaxis.set_major_locator(ticker.MaxNLocator(n_ticks, prune='lower'))
+        if self.diag_axes is not None:
+            for ax in self.diag_axes:
+                ax.xaxis.set_major_locator(ticker.MaxNLocator(n_ticks, prune='lower'))
 
 
     def set_labels(self, labels, **kwargs):
