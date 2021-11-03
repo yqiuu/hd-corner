@@ -245,13 +245,14 @@ class Corner:
         if not self._no_diag:
             self.axes[0, 0].set_yticks([])
         #
-        lbounds=np.min(data_xy, axis=0)
-        lbounds=np.min(np.vstack([lbounds, self._lbounds]), axis=0)
-        ubounds=np.max(data_xy, axis=0)
-        ubounds=np.max(np.vstack([ubounds, self._ubounds]), axis=0)
-        self.set_ranges(np.vstack([lbounds, ubounds]).T)
-        self._lbounds=lbounds
-        self._ubounds=ubounds
+        if not np.any(np.isnan(data_xy)) and not np.any(np.isinf(data_xy)):
+            lbounds=np.min(data_xy, axis=0)
+            lbounds=np.min(np.vstack([lbounds, self._lbounds]), axis=0)
+            ubounds=np.max(data_xy, axis=0)
+            ubounds=np.max(np.vstack([ubounds, self._ubounds]), axis=0)
+            self.set_ranges(np.vstack([lbounds, ubounds]).T)
+            self._lbounds=lbounds
+            self._ubounds=ubounds
         n_ticks=4
         #
         for ax in self.axes[-1]:
